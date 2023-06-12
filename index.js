@@ -60,6 +60,7 @@ async function run() {
       res.send(result);
     })
     // make instructor
+    
     app.patch('/users/instructor/:id',async(req,res)=>{
       const id = req.params.id;
       const filter = {_id : new ObjectId(id)};
@@ -71,7 +72,6 @@ async function run() {
       const result = await usersCollections.updateOne(filter,updatedDoc);
       res.send(result);
     })
-
 
     // all classes data get 
     app.get('/classes',async(req,res)=>{
