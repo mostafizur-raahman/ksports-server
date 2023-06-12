@@ -33,6 +33,10 @@ async function run() {
 
 
     // user related api
+    app.get('/users',async(req,res)=>{
+      const result = await usersCollections.find().toArray();
+      res.send(result);
+    })
     app.post('/users',async(req,res)=>{
       const user = req.body;
       const query = {email : user.email};
@@ -42,6 +46,30 @@ async function run() {
       }
       const result = await usersCollections.insertOne(user);
       res.send(result)
+    })
+    // make admin
+    app.patch('/users/admin/:id',async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id : new ObjectId(id)};
+      const updatedDoc ={
+        $set:{
+          role:"admin"
+        }
+      }
+      const result = await usersCollections.updateOne(filter,updatedDoc);
+      res.send(result);
+    })
+    // make instructor
+    app.patch('/users/instructor/:id',async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id : new ObjectId(id)};
+      const updatedDoc ={
+        $set:{
+          role:"instructor"
+        }
+      }
+      const result = await usersCollections.updateOne(filter,updatedDoc);
+      res.send(result);
     })
 
 
@@ -59,7 +87,6 @@ async function run() {
 
     app.get('/selects',async(req,res)=>{
       const email = req.query.email;
-      console.log(email);
       if(!email) res.send([])
       const query = {email : email};
       const result = await selectCollections.find(query).toArray();
