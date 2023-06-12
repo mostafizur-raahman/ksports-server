@@ -15,7 +15,7 @@ const verifyJWT = (req,res,next)=>{
   if(!authorization) return res.status(401).send({error:true,messsage:'unauthorized access'});
 
   //berer token
-  const token = authorization.splite(' ')[1];
+  const token = authorization.split(' ')[1];
   jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
     if(err){
       return res.status(401).send({error:true,messsage:'unauthorized access'});
@@ -69,6 +69,18 @@ async function run() {
       const result = await usersCollections.insertOne(user);
       res.send(result)
     })
+    //get admin
+    app.get('/users/admin/:email',verifyJWT,async(req,res)=>{
+      const email = req.params.email;
+
+      if(req.decoded.email !== email){
+        res.send({admin:false})
+      }
+      const query = {email: email};
+      const user = await usersCollections.findOne(query);     
+      const result = {admin:user?.role ==='admin'}
+      res.send(result);
+    })
     // make admin
     app.patch('/users/admin/:id',async(req,res)=>{
       const id = req.params.id;
@@ -113,7 +125,7 @@ async function run() {
 
       const decodedEmail = req.decoded.email;
       if(email != decodedEmail){
-        
+        return res.status(403).send({error:true,messsage:'porbidden access'});
       }
       const query = {email : email};
       const result = await selectCollections.find(query).toArray();
