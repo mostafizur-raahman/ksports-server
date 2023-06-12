@@ -27,8 +27,23 @@ async function run() {
    // await client.connect();
 
    const classCollections = client.db('classesDB').collection('classes');
+   const usersCollections = client.db('classesDB').collection('users');
    const teacherCollections = client.db('classesDB').collection('teacher');
    const selectCollections = client.db('classesDB').collection('select');
+
+
+    // user related api
+    app.post('/users',async(req,res)=>{
+      const user = req.body;
+      const query = {email : user.email};
+      const existingUser = await usersCollections.findOne(query);
+      if(existingUser) {
+        return res.send({messsage :'user already exist!'});
+      }
+      const result = await usersCollections.insertOne(user);
+      res.send(result)
+    })
+
 
     // all classes data get 
     app.get('/classes',async(req,res)=>{
@@ -61,7 +76,7 @@ async function run() {
       const id = req.params.id;
       const query = {_id : new ObjectId(id)};
       const result = await selectCollections.deleteOne(query);
-      frames.send(result);
+      res.send(result);
 
     })
 
