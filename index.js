@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
@@ -8,6 +9,21 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// verify jwt
+const verifyJWT = (req,res,next)=>{
+  const authorization = req.headers.authorization;
+  if(!authorization) return res.status(401).send({error:true,messsage:'unauthorized access'});
+
+  //berer token
+  const token = authorization.splite(' ')[1];
+  jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
+    if(err){
+      return res.status(401).send({error:true,messsage:'unauthorized access'});
+    }
+    req.decoded = decoded;
+    next();
+  })
+}
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jm9b2up.mongodb.net/?retryWrites=true&w=majority`;
@@ -31,6 +47,12 @@ async function run() {
    const teacherCollections = client.db('classesDB').collection('teacher');
    const selectCollections = client.db('classesDB').collection('select');
 
+   // jwt
+   app.post('/jwt',(req,res)=>{
+    const user = req.body;
+    const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
+    res.send({token});
+   })
 
     // user related api
     app.get('/users',async(req,res)=>{
@@ -85,9 +107,14 @@ async function run() {
 
     // select or cart collections
 
-    app.get('/selects',async(req,res)=>{
+    app.get('/selects',verifyJWT,async(req,res)=>{
       const email = req.query.email;
       if(!email) res.send([])
+
+      const decodedEmail = req.decoded.email;
+      if(email != decodedEmail){
+        
+      }
       const query = {email : email};
       const result = await selectCollections.find(query).toArray();
       res.send(result);
