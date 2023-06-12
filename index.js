@@ -26,9 +26,27 @@ async function run() {
    
    // await client.connect();
 
-   const classCollectopns = client.db('classesDB').collection('classes');
-   
+   const classCollections = client.db('classesDB').collection('classes');
+   const teacherCollections = client.db('classesDB').collection('teacher');
+   const selectCollections = client.db('classesDB').collection('select');
 
+    // all classes data get 
+    app.get('/classes',async(req,res)=>{
+        const result = await classCollections.find().toArray();
+        res.send(result);
+    })
+    app.get('/teacher',async(req,res)=>{
+        const result = await teacherCollections .find().toArray();
+        res.send(result);
+    })
+
+    // select or cart collections
+    app.post('/selects',async(req,res)=>{
+      const item = req.body;
+      console.log(item);
+      const result = await selectCollections.insertOne(item);
+      res.send(result); 
+    })
 
 
    
