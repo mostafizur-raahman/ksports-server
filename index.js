@@ -112,6 +112,12 @@ async function run() {
         const result = await classCollections.find().toArray();
         res.send(result);
     })
+
+    app.post('/classes',async(req,res)=>{
+      const newClass = req.body;
+      const result = await classCollections.insertOne(newClass);
+      res.send(result);
+    })
     app.get('/teacher',async(req,res)=>{
         const result = await teacherCollections .find().toArray();
         res.send(result);
@@ -131,6 +137,8 @@ async function run() {
       const result = await selectCollections.find(query).toArray();
       res.send(result);
     })
+
+
     app.post('/selects',async(req,res)=>{
       const item = req.body;
       console.log(item);
